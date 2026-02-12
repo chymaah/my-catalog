@@ -22,7 +22,7 @@ export default function CatalogPage() {
 
   return (
     <main style={{ padding: 24 }}>
-      <h1>Mini Catalog</h1>
+      <h1>Mini Catalog Test CI/CD</h1>
       <ul>
         {products.map((p) => (
           <li key={p.id}>
