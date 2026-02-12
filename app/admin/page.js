@@ -1,29 +1,49 @@
-import prisma from "../../lib/prisma";
+"use client";
 
-// Server Action pour ajouter un produit
-export async function addProduct(formData) {
-  "use server"; // DOIT être ici, au début de la fonction
-  const name = formData.get("name");
-  const price = parseFloat(formData.get("price"));
-  if (!name || isNaN(price)) return;
-
-  await prisma.product.create({
-    data: { name, price },
-  });
-}
-
-export const dynamic = "force-dynamic"; // désactive le cache
+import { useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function AdminPage() {
-  return (
-    <main style={{ padding: 24, fontFamily: "Arial" }}>
-      <h1>Admin</h1>
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [message, setMessage] = useState("");
 
-      <form action={addProduct} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <input name="name" placeholder="Nom du produit" />
-        <input name="price" type="number" placeholder="Prix" step="0.01" />
-        <button type="submit">Ajouter</button>
+  async function addProduct(e) {
+    e.preventDefault();
+
+    const { data, error } = await supabase
+      .from("product")
+      .insert([{ name, price: parseFloat(price) }]);
+
+    if (error) {
+      setMessage("Erreur : " + error.message);
+    } else {
+      setMessage("Produit ajouté !");
+      setName("");
+      setPrice("");
+    }
+  }
+
+  return (
+    <main style={{ padding: 24 }}>
+      <h1>Admin</h1>
+      <form onSubmit={addProduct}>
+        <input
+          name="name"
+          placeholder="Nom du produit"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          name="price"
+          type="number"
+          placeholder="Prix"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+        <button type="submit">Ajouter produit</button>
       </form>
+      <p>{message}</p>
     </main>
   );
 }

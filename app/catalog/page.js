@@ -1,21 +1,31 @@
-import prisma from "../../lib/prisma";
+"use client";
 
-export const dynamic = "force-dynamic"; // pour désactiver le cache ISR
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
 
-export default async function CatalogPage() {
-  const products = await prisma.product.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+export default function CatalogPage() {
+  const [products, setProducts] = useState([]);
 
-  // Retourne JSX directement
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from("product")
+        .select("*")
+        .order("createdat", { ascending: false });
+
+      if (error) console.error(error);
+      else setProducts(data);
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
-    <main style={{ padding: 24, fontFamily: "Arial" }}>
+    <main style={{ padding: 24 }}>
       <h1>Mini Catalog</h1>
-      <p>Liste des produits :</p>
-
-      <ul style={{ marginTop: 20 }}>
+      <ul>
         {products.map((p) => (
-          <li key={p.id} style={{ marginBottom: 10 }}>
+          <li key={p.id}>
             <b>{p.name}</b> — {p.price.toFixed(2)} DT
           </li>
         ))}
